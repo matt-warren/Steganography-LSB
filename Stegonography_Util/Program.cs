@@ -1,10 +1,10 @@
 ﻿/*
 * FILE : Program.cs
 * PROJECT : ACS a3 CameraSteganography
-* PROGRAMMER : Joe Student
-* FIRST VERSION : 2012-05-01
+* PROGRAMMER : Matt Warren & Steven Johnston
+* FIRST VERSION : 2016-03-31
 * DESCRIPTION :
-* The functions in this file are used to …
+* This file is used to illustrate the use of the static functions in Encoder.cs and Scanner.cs
 */
 
 using System;

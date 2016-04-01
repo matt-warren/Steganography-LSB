@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*
+* FILE : Encoder.cs
+* PROJECT : ACS a3 CameraSteganography
+* PROGRAMMER : Matt Warren & Steven Johnston
+* FIRST VERSION : 2016-03-31
+* DESCRIPTION :
+* This class is used to encrypt and decrypt files by changing the LSB of the pixels.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -94,6 +103,7 @@ namespace Steganography_Util
                                 //if at end and 1 byte worth of 0s have been added
                                 if (endMessage && endZeros == 8)
                                 {
+                                    //if it didn't add the last pixel, add it now
                                     if (currColor != encodeColor.red)
                                     {
                                         inBitmap.SetPixel(w, h, Color.FromArgb(r, g, b));
@@ -101,6 +111,7 @@ namespace Steganography_Util
                                     finished = true;
                                     break;
                                 }
+                                //if a character was finished and a new one is needed,
                                 if (pixelIndex % 8 == 0)
                                 {
                                     if (charNum >= message.Length)
@@ -110,8 +121,8 @@ namespace Steganography_Util
                                         endMessage = true;
                                     }
                                     else {
+                                        //get next character to encrypt
                                         currChar = message[charNum++];
-
                                         hidingText = true;
                                     }
                                 }
@@ -147,6 +158,7 @@ namespace Steganography_Util
                                 pixelIndex++;
                                 if (endMessage)
                                 {
+                                    //start incrementing zeros added
                                     endZeros++;
                                 }
                             }
@@ -158,7 +170,10 @@ namespace Steganography_Util
                             Console.WriteLine("Encryption successful");
                             Bitmap outBitmap = new Bitmap(inBitmap);
                             inBitmap.Dispose();
+
+                            //change filename
                             filename = Regex.Replace(filename, @"\..+", ".png").ToString();
+                            //save file
                             outBitmap.Save(("encrypted_" + filename), ImageFormat.Png);
                             outBitmap.Dispose();
                             break;
@@ -177,6 +192,12 @@ namespace Steganography_Util
 
         }
 
+
+        // DESCRIPTION :
+        //              this function is used to decrypt a message in a file. It takes a filepath for input
+        //              and then reads it as binary and checks the LSB of each pixel, adding them to a string
+        // PARAMETERS :
+        //              string: filename --- this is the filename/path of the image to decrypt
         static public void Decrypt(string filename)
         {
             if (File.Exists(filename))
@@ -197,11 +218,11 @@ namespace Steganography_Util
 
                         for (int i = 0; i < 3; i++)
                         {
-                            //this is to add the bits to the currB
+                            //this is to add the bits to the current byte
                             switch (currColor)
                             {
                                 case encodeColor.red:
-                                    //shift left 1 bit, opens LSB, and then write R text to it
+                                    //shift left 1 bit, opens up LSB, and then write R text to it
                                     currByte = currByte * 2 + pixel.R % 2;
                                     currColor = encodeColor.green;
                                     break;
@@ -218,16 +239,22 @@ namespace Steganography_Util
                             }
 
                             bitsDone++;
+                            //if done a byte of data,
                             if (bitsDone % 8 == 0)
                             {
+                                //we added the bytes in proper order but when we read them,
+                                //the byte ends up looking like this: 12345678 so it needs to
+                                //be reverse before it is readable
                                 currByte = reverseBits(currByte);
 
+                                //if the current byte is 0, it is finished
                                 if (currByte == 0)
                                 {
                                     finished = true;
                                     break;
                                 }
 
+                                //otherwise add the character to the string
                                 message += ((char)currByte).ToString();
                             }
                         }
@@ -249,13 +276,19 @@ namespace Steganography_Util
             }
         }
 
-        static private int reverseBits(int n)
+
+        // DESCRIPTION :
+        //              this function is used reverse the bits of a number
+        // PARAMETERS :
+        //              int: number --- number to reverse
+        static private int reverseBits(int number)
         {
             int reversed = 0;
             for(int i = 0; i < 8; i++)
             {
-                reversed = reversed * 2 + n % 2;
-                n /= 2;
+                //shift bits to the left (opens LSB), and add the next bit of number
+                reversed = reversed * 2 + number % 2;
+                number /= 2;
             }
             return reversed;
         }
